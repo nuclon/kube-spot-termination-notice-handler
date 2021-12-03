@@ -69,6 +69,23 @@ done
 echo "$(date): ${http_status}"
 MESSAGE="Spot Termination${CLUSTER_INFO}: ${NODE_NAME}, Instance: ${INSTANCE_ID}, Instance Type: ${INSTANCE_TYPE}, AZ: ${AZ}"
 
+# Remove instance tags
+if [ "${REMOVE_INSTANCE_TAGS}" != "" ]; then
+  TAGS_LIST=""
+  for TAG in $REMOVE_INSTANCE_TAGS; do
+    if [ -n "${TAG_LIST}" ]; then
+      TAG_LIST="${TAG_LIST} Key=${TAG}"
+    else
+      TAG_LIST="Key=${TAG}"
+    fi
+  done
+
+  aws ec2 delete-tags \
+    --region $REGION \
+    --resources $INSTANCE_ID \
+    --tags $TAG_LIST
+fi
+
 # Notify Hipchat
 # Set the HIPCHAT_ROOM_ID & HIPCHAT_AUTH_TOKEN variables below.
 # Further instructions at https://www.hipchat.com/docs/apiv2/auth

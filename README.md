@@ -163,6 +163,53 @@ If you set the environment variable `DETACH_ASG` to _any value other than_ `fals
 
 The autoscaling group name is automatically detected by the handler.
 
+## Remove instance tags
+
+The environment variable `REMOVE_INSTANCE_TAGS` can contain list of tag names which should be removed from the instance delimeted by space.
+
+The instance should have a role which allows it happen. Example of policy for the role:
+
+```
+        {
+            "Sid": "DeleteOwnTags",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DeleteTags"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:ARN": "${ec2:SourceInstanceARN}"
+                }
+            }
+        }
+```
+
+Example Pod Spec:
+
+```
+        env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: SLACK_URL
+            value: "https://hooks.slack.com/services/T67UBFNHQ/B4Q7WQM52/1ctEoFjkjdjwsa22934"
+          - name: SLACK_CHANNEL
+          - value: "#devops"
+          - name: CLUSTER
+            value: development
+          - name: DETACH_ASG
+            value: "true"
+          - name: REMOVE_INSTANCE_TAGS
+            value: "Prometheus-Monitoring Prometheus-Monitoring-Exporters"
+```
+
+
 ## Credits
 
 kube-spot-termination-notice-handler is a collaborative project to unify [@mumoshu and @kylegato's initial work](https://github.com/mumoshu/kube-spot-termination-notice-handler) and [@egeland's fork with various enhancements and simplifications](https://github.com/egeland/kube-spot-termination-notice-handler).
